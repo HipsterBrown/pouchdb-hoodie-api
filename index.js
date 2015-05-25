@@ -2,6 +2,10 @@
 
 var exports = module.exports = { hoodieApi: hoodieApi }
 
+var state = {
+  pouchDBChangesFeedEmitter: undefined
+}
+
 function hoodieApi () {
   return {
     db: this,
@@ -12,7 +16,9 @@ function hoodieApi () {
     update: require('./update').bind(this),
     updateOrAdd: require('./update-or-add').bind(this),
     updateAll: require('./update-all').bind(this),
-    remove: require('./remove').bind(this)
+    remove: require('./remove').bind(this),
+    on: require('./on').bind(this, state),
+    off: require('./off').bind(this, state)
   }
 }
 
