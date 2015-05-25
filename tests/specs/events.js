@@ -87,6 +87,39 @@ test('store.on("add") with adding two', function (t) {
   })
 })
 
+test('store.on("add") with one element added before registering event and one after', function (t) {
+  t.plan(2)
+
+  var db = dbFactory()
+  var store = db.hoodieApi()
+  var addEvents = []
+
+  store.add({
+    foo: 'bar'
+  })
+
+  .then(function () {
+    store.on('add', function (object) {
+      addEvents.push({
+        object: object
+      })
+    })
+
+    store.add({
+      foo: 'baz'
+    })
+
+    .then(waitFor(function () {
+      return addEvents.length
+    }, 1))
+
+    .then(function () {
+      t.is(addEvents.length, 1, 'triggers only 1 add event')
+      t.is(addEvents[0].object.foo, 'baz', 'event passes object')
+    })
+  })
+})
+
 test('store.on("add") with add & update', function (t) {
   t.plan(2)
 
