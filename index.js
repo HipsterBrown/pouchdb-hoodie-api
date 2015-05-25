@@ -2,7 +2,10 @@
 
 var exports = module.exports = { hoodieApi: hoodieApi }
 
+var EventEmitter = require('events').EventEmitter
+
 var state = {
+  emitter: new EventEmitter(),
   pouchDBChangesFeedEmitter: undefined
 }
 

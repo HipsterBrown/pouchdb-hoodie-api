@@ -24,14 +24,14 @@ function on (state, eventName, handler) {
       live: true,
       include_docs: true
     })
+    .on('create', function (change) {
+      state.emitter.emit('add', change.doc)
+    })
   }
 
   switch (eventName) {
     case 'add':
-      var handlerWrapper = function (change) {
-        return handler(change.doc)
-      }
-      state.pouchDBChangesFeedEmitter.on('create', handlerWrapper)
+      state.emitter.on('add', handler)
       break
     case 'update':
       break
