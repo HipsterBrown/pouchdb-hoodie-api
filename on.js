@@ -27,13 +27,15 @@ function on (state, eventName, handler) {
     .on('create', function (change) {
       state.emitter.emit('add', change.doc)
     })
+    .on('update', function (change) {
+      state.emitter.emit('update', change.doc)
+    })
   }
 
   switch (eventName) {
     case 'add':
-      state.emitter.on('add', handler)
-      break
     case 'update':
+      state.emitter.on(eventName, handler)
       break
     case 'remove':
       break

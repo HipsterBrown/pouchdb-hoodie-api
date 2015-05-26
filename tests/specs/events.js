@@ -148,3 +148,140 @@ test('store.on("add") with add & update', function (t) {
     t.is(addEvents[0].object.nr, 1, 'event passes object')
   })
 })
+
+test('store.on("update") with updating one', function (t) {
+  t.plan(2)
+
+  var db = dbFactory()
+  var store = db.hoodieApi()
+  var updateEvents = []
+
+  store.add({
+    id: 'test'
+  })
+
+  .then(function (obj) {
+    store.on('update', function (object) {
+      updateEvents.push({
+        object: object
+      })
+    })
+
+    store.update({
+      id: 'test',
+      foo: 'bar'
+    })
+
+    .then(waitFor(function () {
+      return updateEvents.length
+    }, 1))
+
+    .then(function () {
+      t.is(updateEvents.length, 1, 'triggers 1 update event')
+      t.is(updateEvents[0].object.foo, 'bar', 'event passes object')
+    })
+  })
+})
+
+test('store.on("update") with updating two', function (t) {
+  t.plan(3)
+
+  var db = dbFactory()
+  var store = db.hoodieApi()
+  var updateEvents = []
+
+  store.add([
+    {id: 'first'},
+    {id: 'second'}
+  ])
+
+  .then(function (obj) {
+    store.on('update', function (object) {
+      updateEvents.push({
+        object: object
+      })
+    })
+
+    return store.update([
+      { id: 'first', foo: 'bar'},
+      { id: 'second', foo: 'baz'}
+    ])
+
+    .then(waitFor(function () {
+      return updateEvents.length
+    }, 2))
+
+    .then(function () {
+      t.is(updateEvents.length, 2, 'triggers 2 update event')
+      t.is(updateEvents[0].object.foo, 'bar', '1st event passes object')
+      t.is(updateEvents[1].object.foo, 'baz', '2nd event passes object')
+    })
+  })
+})
+
+test('store.on("update") with add & update', function (t) {
+  t.plan(2)
+
+  var db = dbFactory()
+  var store = db.hoodieApi()
+  var updateEvents = []
+
+  store.updateOrAdd({
+    id: 'test',
+    nr: 1
+  })
+
+  .then(function () {
+    store.on('update', function (object) {
+      updateEvents.push({
+        object: object
+      })
+    })
+
+    store.updateOrAdd('test', {nr: 2})
+
+    .then(waitFor(function () {
+      return updateEvents.length
+    }, 1))
+
+    .then(function () {
+      t.is(updateEvents.length, 1, 'triggers 1 update event')
+      t.is(updateEvents[0].object.nr, 2, 'event passes object')
+    })
+  })
+})
+
+test('store.on("update") with update all', function (t) {
+  t.plan(3)
+
+  var db = dbFactory()
+  var store = db.hoodieApi()
+  var updateEvents = []
+
+  return store.add([
+    {id: 'first'},
+    {id: 'second'}
+  ])
+
+  .then(function () {
+    store.on('update', function (object) {
+      updateEvents.push({
+        object: object
+      })
+    })
+
+    store.updateAll({
+      foo: 'bar'
+    })
+
+    .then(waitFor(function () {
+      return updateEvents.length
+    }, 2))
+
+    .then(function () {
+      t.is(updateEvents.length, 2, 'triggers 2 update events')
+      t.is(updateEvents[0].object.foo, 'bar', '1st event passes object')
+      t.is(updateEvents[1].object.foo, 'bar', '2nd event passes object')
+    })
+  })
+})
