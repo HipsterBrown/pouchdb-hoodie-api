@@ -285,3 +285,101 @@ test('store.on("update") with update all', function (t) {
     })
   })
 })
+
+test('store.on("remove") with removing one', function (t) {
+  t.plan(2)
+
+  var db = dbFactory()
+  var store = db.hoodieApi()
+  var removeEvents = []
+
+  return store.add({
+    id: 'one',
+    foo: 'bar'
+  })
+
+  .then(function () {
+    store.on('remove', function (object) {
+      removeEvents.push({
+        object: object
+      })
+    })
+
+    store.remove('one')
+
+    .then(waitFor(function () {
+      return removeEvents.length
+    }, 1))
+
+    .then(function () {
+      t.is(removeEvents.length, 1, 'triggers 1 remove events')
+      t.is(removeEvents[0].object.id, 'one', 'event passes object')
+    })
+  })
+})
+
+test('store.on("remove") with removing two', function (t) {
+  t.plan(3)
+
+  var db = dbFactory()
+  var store = db.hoodieApi()
+  var removeEvents = []
+
+  return store.add([
+    {id: 'one'},
+    {id: 'two'}
+  ])
+
+  .then(function () {
+    store.on('remove', function (object) {
+      removeEvents.push({
+        object: object
+      })
+    })
+
+    store.remove(['one', 'two'])
+
+    .then(waitFor(function () {
+      return removeEvents.length
+    }, 2))
+
+    .then(function () {
+      t.is(removeEvents.length, 2, 'triggers 2 remove events')
+      t.is(removeEvents[0].object.id, 'one', '1st event passes object')
+      t.is(removeEvents[1].object.id, 'two', '2nd event passes object')
+    })
+  })
+})
+
+test('store.on("remove") with remove all', function (t) {
+  t.plan(3)
+
+  var db = dbFactory()
+  var store = db.hoodieApi()
+  var removeEvents = []
+
+  return store.add([
+    {id: 'one'},
+    {id: 'two'}
+  ])
+
+  .then(function () {
+    store.on('remove', function (object) {
+      removeEvents.push({
+        object: object
+      })
+    })
+
+    store.removeAll()
+
+    .then(waitFor(function () {
+      return removeEvents.length
+    }, 2))
+
+    .then(function () {
+      t.is(removeEvents.length, 2, 'triggers 2 remove events')
+      t.is(removeEvents[0].object.id, 'one', '1st event passes object')
+      t.is(removeEvents[1].object.id, 'two', '2nd event passes object')
+    })
+  })
+})

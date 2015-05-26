@@ -1,5 +1,7 @@
 'use strict'
 
+var toObject = require('./utils/to-object')
+
 module.exports = on
 
 /**
@@ -25,19 +27,21 @@ function on (state, eventName, handler) {
       include_docs: true
     })
     .on('create', function (change) {
-      state.emitter.emit('add', change.doc)
+      state.emitter.emit('add', toObject(change.doc))
     })
     .on('update', function (change) {
-      state.emitter.emit('update', change.doc)
+      state.emitter.emit('update', toObject(change.doc))
+    })
+    .on('delete', function (change) {
+      state.emitter.emit('remove', toObject(change.doc))
     })
   }
 
   switch (eventName) {
     case 'add':
     case 'update':
-      state.emitter.on(eventName, handler)
-      break
     case 'remove':
+      state.emitter.on(eventName, handler)
       break
     case 'change':
       break
